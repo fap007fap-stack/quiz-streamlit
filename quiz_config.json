@@ -1,0 +1,7 @@
+{
+  "title": "Quiz dla Ciebie",
+  "recipient": "",
+  "dedication": "Ten quiz jest przygotowany specjalnie dla Ciebie. Daj sobie czas, spróbuj i zobacz, ile już potrafisz. Powodzenia!",
+  "image_file": "assets/start.png",
+  "questions_file": "data/pytania.xlsx"
+}
