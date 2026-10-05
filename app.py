@@ -55,25 +55,6 @@ cfg = st.session_state.settings
 with st.sidebar:
     st.subheader("Twój quiz")
     st.caption("Ustawienia dotyczą tej sesji przeglądarki.")
-    with st.expander("Wygląd i dedykacja"):
-        cfg["title"] = st.text_input("Tytuł", value=cfg.get("title", "Quiz dla Ciebie"))
-        cfg["recipient"] = st.text_input("Dla kogo?", value=cfg.get("recipient", ""))
-        cfg["dedication"] = st.text_area("Dedykacja", value=cfg.get("dedication", ""))
-        picture = st.file_uploader("Obrazek na stronie startowej", type=["png", "jpg", "jpeg", "webp"])
-        if picture:
-            try:
-                raw = picture.getvalue()
-                img = Image.open(BytesIO(raw))
-                img.verify()
-                if img.width * img.height > 20_000_000:
-                    raise ValueError("Wybierz obrazek do 20 milionów pikseli.")
-                st.session_state.picture = raw
-            except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as exc:
-                st.error(f"Nie można użyć obrazka: {exc}")
-        if st.button("Usuń obrazek z sesji"):
-            st.session_state.pop("picture", None)
-        st.download_button("Pobierz ustawienia do GitHuba", json.dumps(cfg, ensure_ascii=False, indent=2), "quiz_config.json", "application/json")
-        st.caption("Aby zapisać wygląd na stałe, zastąp quiz_config.json w repozytorium i dodaj własny obrazek jako assets/start.png.")
     with st.expander("Pytania i szablon", expanded=st.session_state.page == "home"):
         upload = st.file_uploader("Wgraj pytania", type=["xlsx", "csv"], key="questions_upload")
         if st.button("Wczytaj plik", disabled=upload is None):
@@ -149,22 +130,8 @@ if page == "home":
             if st.button("Przejdź dalej →", type="primary", use_container_width=True):
                 st.session_state.selected_count = count
                 st.session_state.selected_mode = mode
-                st.session_state.page = "dedication"
+                begin(pool, count)
                 st.rerun()
-
-elif page == "dedication":
-    st.caption("PRZYGOTOWANE SPECJALNIE DLA CIEBIE")
-    st.title(f"Dla Ciebie, {cfg['recipient']}" if cfg.get("recipient") else "Dla Ciebie")
-    st.write(cfg.get("dedication", "Powodzenia!"))
-    st.divider()
-    st.subheader(st.session_state.get("selected_mode", "3 losowe pytania"))
-    count = st.session_state.get("selected_count", 3)
-    if count and count > len(pool):
-        st.info(f"W puli jest {len(pool)} pytań. Zobaczysz wszystkie, w losowej kolejności.")
-    st.caption("Losowanie bez powtórzeń. Powtórka całej puli zachowuje kolejność z pliku.")
-    if st.button("Zaczynam quiz →", type="primary", use_container_width=True):
-        begin(pool, count)
-        st.rerun()
 
 elif page == "quiz":
     questions = st.session_state["round"]
